@@ -94,7 +94,44 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         return volume.getVoxel(x, y, z);
     }
 
+        short getTriVoxel(double[] coord) {
 
+        if (coord[0] < 0 || coord[0] > volume.getDimX() || coord[1] < 0 || coord[1] > volume.getDimY()
+                || coord[2] < 0 || coord[2] > volume.getDimZ()) {
+            return 0;
+        }
+        
+        double x0 = coord[0];
+        double y0 = coord[1];
+        double z0 = coord[2];
+        
+        int x = (int) Math.floor(coord[0]);
+        int y = (int) Math.floor(coord[1]);
+        int z = (int) Math.floor(coord[2]);
+        
+        double a = x0 - x;
+        double b = y0 - y;
+        double c = z0 - z;
+        
+        short intensity_01 = volume.getVoxel(x, y, z);
+        short intensity_02 = volume.getVoxel(x+1, y, z);
+        short intensity_03 = volume.getVoxel(x+1, y+1, z);
+        short intensity_04 = volume.getVoxel(x, y+1, z);
+        short intensity_11 = volume.getVoxel(x, y, z+1);
+        short intensity_12 = volume.getVoxel(x+1, y, z+1);
+        short intensity_13 = volume.getVoxel(x+1, y+1, z+1);
+        short intensity_14 = volume.getVoxel(x, y+1, z+1);
+        
+        double intensity_dot = (1-a)*(1-b)*(1-c)*intensity_01 
+                + (a)*(1-b)*(1-c)*intensity_02 +(a)*(b)*(1-c)*intensity_03 
+                +(1-a)*(b)*(1-c)*intensity_04 +(1-a)*(1-b)*(c)*intensity_11 
+                + (a)*(1-b)*(c)*intensity_12 +(a)*(b)*(c)*intensity_13 
+                +(1-a)*(b)*(c)*intensity_14;
+                
+        return (short)intensity_dot;
+        
+    }
+    
     void slicer(double[] viewMatrix) {
 
         // clear image
